@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <style>
+
+      .docBody {
+        display: flex;
+        height: 100%;
+      }
+
+      .menuHeader {
+        display: block;        
+        text-align: center;
+        font-family:Arial, Helvetica, sans-serif;
+      }
+
+      .leftHeader {
+        width: 80%;
+        display: flex;
+      }
+
+      .rightHeader {
+         width: 20%;
+      }
+
+      .selectHeader {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 40px;
+        text-align: center;
+		color: #696969;
+      }
+
+      .contentHeader {
+        display: none;
+        width: 100%;
+        font-family:Arial, Helvetica, sans-serif;
+      }
+
+      .players {
+        width: 100%;
+        height: fit-content;
+        display: block;
+        align-items: center;
+        text-align: center;
+        background-color: #DDE2B9;
+        padding: 0.5em;
+        margin: 0.5em;
+        border-radius: 0.5em;
+      }
+
+      .playerButtons {
+        width: 33%;
+        height: 10em;
+        margin: 1em;
+        font-size: 30px;
+        font-family: Arial, Helvetica, sans-serif;
+        color: black;
+        background-color: #F6D294;
+        border-radius: 1em;
+        cursor: pointer;
+        border: none;
+      }
+
+      .playerButtons:hover {
+        color: #1c1c1c;
+        background-color: #EBA57D;
+        border-radius: 2em;
+      }
+
+      .playerButtonsContainer {
+        width: 100%;
+        display: flex;
+      }
+
+      .scoreArea {
+        height: 400px;
+        width: 5em;
+        align-self: center;
+        display: flex; 
+        margin:0.5em auto;  
+        border-radius: 0.5em;
+        font-size: larger;
+        text-align: center;  
+        border: none;      
+      }
+
+      .scoreTotal {
+        height: 2em;
+        width: 5em;
+        resize: none;      
+        margin:0 auto;  
+        border-radius: 0.5em;
+        font-size: larger;
+        font-weight: bolder;
+        text-align: center; 
+        padding-top:1em;
+        border: none; 
+      }
+
+    </style>
+
+  </head>
+
+  <body style="background-color: #FEFCC4">
+
+    <div id="menu" class="menuHeader">
+      <h1 style="font-family:cursive; color: #EBA57D">Scrabble Tally</h1>
+    </div>
+
+    <div id="top">
+      <h2 class="selectHeader">Select Number of Players</h2>
+      <div class="playerButtonsContainer">
+        <button onclick="startGame(2)" class="playerButtons">2</button>
+        <button onclick="startGame(3)" class="playerButtons">3</button>
+        <button onclick="startGame(4)" class="playerButtons">4</button>
+      </div>
+    </div>
+
+    <div id="content" class="contentHeader" disabled>
+      <div class="leftHeader">
+        <div style="margin: 10px;">Dictionary:</div> 
+        <input type="file" id="selectedFile" style="margin: 10px;">      
+
+        <input type="text" id="word" name="word">
+        <button onclick="lookup()">Lookup</button>
+        <div id="searchResult" style="margin: 10px;"></div>
+      </div>
+
+      <div class="rightHeader"></div>
+        <button onclick="reset()">Reset</button>
+      </div>
+    </div>
+    <br>
+    <div id="parentPlayers" class="docBody">
+    </div>
+    
+
+    <script>
+
+      function sum(id) 
+      {
+        textarea = document.getElementById(id);
+        arr = textarea.value;
+        arr = arr.split("\n")
+
+        result = 0;
+        for (let i = 0; i < arr.length; i++) {
+          result = result + +arr[i];
+      }
+        total = document.getElementById(id).previousElementSibling
+        total.value = result
+
+        whosTurn(arr.length, id)
+      }
+
+      function whosTurn (lowestTurnLen, id) {
+        scores = document.getElementsByClassName('scoreArea');
+        myMap = new Map()
+        
+        for (let i = 0; i < scores.length; i++) {
+          value = 0
+          if (scores[i].value){
+            value = scores[i].value.split("\n").length;
+            document.getElementById(scores[i].id).parentNode.style.background = '#DDE2B9';
+          }
+          eleId = scores[i].id;
+          myMap.set(eleId,value)
+      }
+        
+        min = Math.min(...myMap.values());
+        max = Math.max(...myMap.values());
+        allEqual = 0
+          
+        if (min == max) {
+          id = document.querySelector('.scoreArea').id;
+          document.getElementById(id).parentNode.style.background = '#EBA57D';
+          return
+          }
+
+        for (const [key, value] of myMap) {
+          if (value < lowestTurnLen) {
+            id = key
+            lowestTurnLen = value
+          }    
+        }
+
+        document.getElementById(id).parentNode.style.background = '#EBA57D';
+        return;
+      }
+
+      function makePlayers (playerNum) {
+        
+        for (let i = 1; i < playerNum+1; i++) {
+          playerBlock = '<div id="container'+i+'" class="players"><h4 contentEditable="true">Player '+i+'</h4><textarea id="total'+i+'" class="scoreTotal" readonly></textarea><textarea id="score'+i+'" class="scoreArea" onchange="sum(this.id)"></textarea></div>'
+          document.getElementById('parentPlayers').innerHTML += playerBlock;
+          }
+          document.getElementById('container1').style.background = '#EBA57D';
+      }
+
+      function startGame (n) {
+        x = document.getElementById("top");
+        y = document.getElementById("content");
+        z = document.getElementById("parentPlayers");
+
+        x.disabled = "true";
+        x.style.display = "none";
+
+        y.disabled = "false";
+        y.style.display = "flex";
+
+        z.disabled = "false";
+        z.style.display = "flex";
+        
+        makePlayers(n);
+      }
+
+      function reset () {
+        location.reload(); 
+      }
+
+      function lookup () {
+        if (!dicText) {
+            document.getElementById("searchResult").innerHTML = "Select a dictionary...";
+            return
+        }
+        word = document.getElementById('word').value.toUpperCase();
+
+        if (!word) {
+            document.getElementById("searchResult").innerHTML = "Enter a word...";
+            return
+        }
+        
+        patterns = "\\b" + word + "\\b";
+        pattern = new RegExp(patterns);
+         
+        if (dicText.match(pattern)) {
+            document.getElementById("searchResult").innerHTML = "That is a word!";
+        } else {
+            document.getElementById("searchResult").innerHTML = "That is NOT a word.";
+        }    
+      }
+
+      //make dictionary global
+      dicText = "";
+
+      function loadDic() {
+        var fr = new FileReader();
+        fr.onload = ()=>{
+        dicText = fr.result;
+        }
+        fr.readAsText(this.files[0]);
+      }  
+
+      //watch for dictionary selection
+      document.getElementById('selectedFile').addEventListener('change', loadDic);
+
+
+    </script>
+  </body>
+</html>
