@@ -138,21 +138,32 @@
     
 
     <script>
+	
+	  	  
+	  function removeBlankScoreLines(lines) {
+		newLines = 0;
+		for (var i = 0; i < lines.length; i++) {
+		  if (lines[i].length > 0) newLines++;
+		  }
+		return newLines;
+	  }
 
-      function sum(id) 
-      {
+      function sum(id)	{
         textarea = document.getElementById(id);
         arr = textarea.value;
         arr = arr.split("\n")
+		arrLen = removeBlankScoreLines(arr);
 
         result = 0;
         for (let i = 0; i < arr.length; i++) {
           result = result + +arr[i];
-      }
+		}
         total = document.getElementById(id).previousElementSibling
         total.value = result
-
-        whosTurn(arr.length, id)
+		
+		whosTurnResult = whosTurn(arrLen, id);
+		
+		document.getElementById(whosTurnResult).focus();
       }
 
       function whosTurn (lowestTurnLen, id) {
@@ -162,7 +173,8 @@
         for (let i = 0; i < scores.length; i++) {
           value = 0
           if (scores[i].value){
-            value = scores[i].value.split("\n").length;
+		    value = scores[i].value.split("\n");
+			value = removeBlankScoreLines(value);            
             document.getElementById(scores[i].id).parentNode.style.background = '#DDE2B9';
           }
           eleId = scores[i].id;
@@ -176,7 +188,7 @@
         if (min == max) {
           id = document.querySelector('.scoreArea').id;
           document.getElementById(id).parentNode.style.background = '#EBA57D';
-          return
+          return id;
           }
 
         for (const [key, value] of myMap) {
@@ -187,16 +199,28 @@
         }
 
         document.getElementById(id).parentNode.style.background = '#EBA57D';
-        return;
+        return id;
       }
+	  	  
+	  function checkEnter (event, id) {
+		 //key code for enter
+		 if(event.keyCode==13) {
+			 event.preventDefault();
+			 document.getElementById(id).value += "\n";
+			 sum(id);
+		 }
+			return false;
+		
+	  }
 
       function makePlayers (playerNum) {
         
         for (let i = 1; i < playerNum+1; i++) {
-          playerBlock = '<div id="container'+i+'" class="players"><h4 contentEditable="true">Player '+i+'</h4><textarea id="total'+i+'" class="scoreTotal" readonly></textarea><textarea id="score'+i+'" class="scoreArea" onchange="sum(this.id)"></textarea></div>'
+          playerBlock = '<div id="container'+i+'" class="players"><h4 contentEditable="true">Player '+i+'</h4><textarea id="total'+i+'" class="scoreTotal" readonly></textarea><textarea id="score'+i+'" class="scoreArea" onchange="sum(this.id)" onKeyDown="checkEnter(event, this.id)"></textarea></div>'
           document.getElementById('parentPlayers').innerHTML += playerBlock;
           }
           document.getElementById('container1').style.background = '#EBA57D';
+		  document.getElementById("score1").focus();
       }
 
       function startGame (n) {
