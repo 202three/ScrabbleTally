@@ -326,6 +326,8 @@
 			 event.preventDefault();
 			 document.getElementById(id).value += "\n";
 			 sum(id);
+			 document.getElementById("word").value = "";
+			 document.getElementById("searchResult").innerHTML = "";
 		 }
 		 if(event.keyCode==13 && id == "word") {
 		   event.preventDefault();
@@ -409,6 +411,13 @@
 			}
 			
 		if (webDic == 1) {
+		
+			word = document.getElementById('word').value.toUpperCase();
+
+			if (!word) {
+				document.getElementById("searchResult").innerHTML = "Enter a word...";
+				return
+			}
 			dicAPI(word);
 			sum(id);}
       }
